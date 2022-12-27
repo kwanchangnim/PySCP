@@ -139,9 +139,9 @@ class PySCP:
                 plt.figure(1, figsize=figsize)
 
             xrow = int(np.sqrt(xdim))
-            xcol = np.ceil(xdim / xrow)
+            xcol = int(np.ceil(xdim / xrow))
             urow = int(np.sqrt(udim))
-            ucol = np.ceil(udim / urow)
+            ucol = int(np.ceil(udim / urow))
             for ix in range(xdim):
                 if self.setup['plotStyle'] == 'grid':
                     plt.subplot(xrow, xcol, ix + 1)

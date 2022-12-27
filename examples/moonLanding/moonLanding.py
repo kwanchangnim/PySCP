@@ -72,7 +72,7 @@ def paper():
     prob.plotXU(traj=prob.result.solutionDimension,
                 show=True,
                 save=False,
-                matlab_path='moonLanding.mat',
+                matlab_path='examples/moonLanding/moonLanding.mat',
                 state_name=[r'$h$', r'$v$'],
                 control_name=['control'],
                 legend=['Initial Guess', 'PySCP', 'GPOPS II'])
