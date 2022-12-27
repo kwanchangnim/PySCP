@@ -1,0 +1,4 @@
+numpy
+matplotlib
+texttable
+cvxpy
