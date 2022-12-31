@@ -74,8 +74,7 @@ class moonLander:
         B[4, 2] = -1 / (planet.g0 * self.Isp[stage - 1])
         return A, B
 
-
-if __name__ == '__main__':
+def paper():
     vehicle = moonLander()
 
     meshConfig = {'discrete': 'fLGR',
@@ -97,3 +96,6 @@ if __name__ == '__main__':
     prob.solve()
     prob.plotXU()
     prob.print()
+
+if __name__ == '__main__':
+    paper()
