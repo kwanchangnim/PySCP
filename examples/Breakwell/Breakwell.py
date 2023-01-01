@@ -11,6 +11,13 @@ from lib.utils.Structs import PhaseInfo
 
 
 class Breakwell:
+    """
+        The Breakwell problem is interesting in solving for the optimal input applied to a double integrator. 
+        The states are the position x(t) and the velocity v(t) so nx=2, and the single, nu=1, control input is the force u(t).
+        The time horizon of this problem is fixed, so t∈[0,tf]. There is an upper bound for the position, (like a wall), 
+        so x(t)≤ℓ. The objective of the Breakwell problem is to move the vehicle from an initial position and velocity, 
+        x(0)=x0 and v(0)=v0, to a final position and velocity, x(tf)=xf and v(tf)=vf, while minimizing the control energy.
+    """
     def __init__(self):
         # scale
         scale = Scale(state_name=['non', 'non'], control_name=['non'])
