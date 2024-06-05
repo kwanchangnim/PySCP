@@ -44,7 +44,8 @@ class PySCP:
                 print('-' * 100)
 
             # solve
-            self.socp.solve(solver='ECOS',  verbose=False)
+            # self.socp.solve(solver='ECOS',  verbose=False)
+            self.socp.solve(solver='MOSEK',  verbose=False)
             # record
             self.RecordResult()
             self.result.addcvxtime(self.socp.cvxProb._solver_stats.solve_time)
@@ -70,23 +71,24 @@ class PySCP:
         return obj
 
     def plotPeroformanceHistory(self):
-        print('Nonlinear:\t', self.algorithm.realJTrace)
+        # print('Nonlinear:\t', self.algorithm.realJTrace)
+        print('Nonlinear: allJTrace\t', self.algorithm.allJTrace)
         print('Linear:\t', self.algorithm.fakeJTrace)
-        print('Ratio History:\t', self.algorithm.ratioHistory)
+        # print('Ratio History:\t', self.algorithm.ratioHistory)
 
-        plt.figure(figsize=(8, 6))
-        ratios = np.zeros_like(self.algorithm.ratioHistory)
-        ratios[0] = self.algorithm.ratioHistory[0]
-        for i in range(1, len(self.algorithm.ratioHistory)):
-            ratios[i] = ratios[i - 1] * self.algorithm.ratioHistory[i]
-        plt.plot(np.arange(1, len(self.algorithm.ratioHistory) + 1), ratios)
-        plt.xlabel('iteration')
-        plt.ylabel('trust region radius')
-        plt.savefig('trust region radius history.jpg', dpi=900, bbox_inches='tight')
-        plt.show()
+        # plt.figure(figsize=(8, 6))
+        # ratios = np.zeros_like(self.algorithm.ratioHistory)
+        # ratios[0] = self.algorithm.ratioHistory[0]
+        # for i in range(1, len(self.algorithm.ratioHistory)):
+        #     ratios[i] = ratios[i - 1] * self.algorithm.ratioHistory[i]
+        # plt.plot(np.arange(1, len(self.algorithm.ratioHistory) + 1), ratios)
+        # plt.xlabel('iteration')
+        # plt.ylabel('trust region radius')
+        # plt.savefig('trust region radius history.jpg', dpi=900, bbox_inches='tight')
+        # plt.show()
 
         plt.figure()
-        plt.plot(self.algorithm.realJTrace, marker='o')
+        # plt.plot(self.algorithm.realJTrace, marker='o')
         plt.plot(self.algorithm.fakeJTrace, marker='*')
         plt.plot(self.algorithm.allJTrace, marker='o')
         plt.plot(self.algorithm.fakeAllJTrace, marker='*')
@@ -119,9 +121,14 @@ class PySCP:
 
             xdim = state.shape[1]
             udim = control.shape[1]
-            xt = xt + tf[0]
-            ut = ut + tf[0]
-            tf[iPhase] = xt[-1]  # TODO
+            if xt[0] == -1:
+                xt = xt + 2*iPhase
+                ut = ut + 2*iPhase
+            else:
+                if iPhase > 0:
+                    xt = xt + tf[iPhase-1]
+                    ut = ut + tf[iPhase-1]
+            tf[iPhase] = xt[-1]
 
             stateyscale = np.ones((xdim,))
             controlyscale = np.ones((udim,))

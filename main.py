@@ -1,10 +1,7 @@
-from examples.Breakwell.Breakwell import paper as breakwellPaper
-from examples.moonLanding.moonLanding import paper as moonLandingPaper
-from examples.GoddardMaximumAscent.goddard import paper as goddardPaper
-
+from examples.aa203_final_project.LanderTrajectoryOptimizer import run
+from examples.aa203_final_project.LanderTrajectoryAnalyzer import analyze
 
 if __name__ == '__main__':
-    breakwellPaper()
-    # moonLandingPaper()
-    
-    # goddardPaper()  # There is bug, solve it 
+
+    run()
+    # analyze()

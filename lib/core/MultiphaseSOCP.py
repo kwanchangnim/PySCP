@@ -17,7 +17,7 @@ class MultiPhaseSOCP:
         self.converged = False
         self.phases = [SingPhaseSOCP(iPhase, setup) for iPhase in range(self.phaseNum)]
 
-        if self.model.linkages:
+        if self.model.linkages or self.model.control_linkages:
             self.linkageCVXvar = cvx.Variable(nonneg=True)
 
         self.cvxProb = self.setupProblem()
@@ -46,8 +46,17 @@ class MultiPhaseSOCP:
             if self.phases[iPhase].phaseInfo.nBoundary:
                 obj += self.algorithm.weightBoundary[iPhase] * self.phases[iPhase].setupBoundaryViolation()  # boundary penalty
 
+        # TODO allowe for additional constrol constraint here I want phi_dot and alpha_dot below some rate. 
+            
+
         if self.model.linkages:
             cstrs += self.setupLinkages()
+            # obj += self.algorithm.weightLinkage * self.linkageCVXvar
+        
+        if self.model.control_linkages:
+            cstrs += self.setupControlLinkages()
+
+        if self.model.linkages or self.model.control_linkages:
             obj += self.algorithm.weightLinkage * self.linkageCVXvar
 
         cvxProb = cvx.Problem(cvx.Minimize(obj), cstrs)
@@ -63,6 +72,17 @@ class MultiPhaseSOCP:
                 diff = linkage.diff
                 difference = self.phases[linkage.right].dv.state[0, istate] * self.phases[linkage.right].phaseInfo.scale.stateScale[istate] - \
                              self.phases[linkage.left].dv.state[-1, istate] * self.phases[linkage.left].phaseInfo.scale.stateScale[istate]
+                cstrs += [difference >= diff[0] - self.linkageCVXvar,
+                          difference <= diff[1] + self.linkageCVXvar]
+        return cstrs
+    
+    def setupControlLinkages(self):
+        cstrs = []
+        for linkage in self.model.control_linkages:
+            for icontrol in linkage.index:
+                diff = linkage.diff
+                difference = self.phases[linkage.right].dv.control[0, icontrol] * self.phases[linkage.right].phaseInfo.scale.controlScale[icontrol] - \
+                             self.phases[linkage.left].dv.control[-1, icontrol] * self.phases[linkage.left].phaseInfo.scale.controlScale[icontrol]
                 cstrs += [difference >= diff[0] - self.linkageCVXvar,
                           difference <= diff[1] + self.linkageCVXvar]
         return cstrs
@@ -132,12 +152,22 @@ class MultiPhaseSOCP:
                    traj[linkage.left].state[-1, linkage.index]
             violationLinkage += np.sum(np.abs(diff[np.where(diff <= diffThresh[0])])) + \
                                 np.sum(np.abs(diff[np.where(diff >= diffThresh[1])]))
+        
+        for linkage in self.model.control_linkages:
+            diffThresh = linkage.diff
+            leftScale = np.squeeze(self.phases[linkage.right].phaseInfo.scale.controlScale[linkage.index])
+            rightScale = np.squeeze(self.phases[linkage.left].phaseInfo.scale.controlScale[linkage.index])
+            diff = traj[linkage.right].control[0, linkage.index] * leftScale / rightScale - \
+                   traj[linkage.left].control[-1, linkage.index]
+            violationLinkage += np.sum(np.abs(diff[np.where(diff <= diffThresh[0])])) + \
+                                np.sum(np.abs(diff[np.where(diff >= diffThresh[1])]))
 
             if self.verbose == 2:
                 print('linkage violation:\t{:.8f}'.format(violationLinkage))
 
-        if self.model.linkages:
+        if self.model.linkages or self.model.control_linkages:
             nuLinkage = self.linkageCVXvar.value
+            if self.verbose == 2: print(nuLinkage)
 
         if self.verbose == 2:
             tb.align = 'r'
