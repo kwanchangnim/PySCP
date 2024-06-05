@@ -312,6 +312,9 @@ class SingPhaseSOCP:
     def setupControlConstraints(self):
         cstrs = [self.dv.control >= self.phaseInfo.control_bound[0].reshape((1, -1)),
                  self.dv.control <= self.phaseInfo.control_bound[1].reshape((1, -1))]
+        for i in range(self.dv.control.shape[0]):
+            cstrs += [cvx.norm(self.dv.control[i,:]) <= self.phaseInfo.control_bound[1][0]]
+
         return cstrs
 
     def setupTimeConstraints(self):

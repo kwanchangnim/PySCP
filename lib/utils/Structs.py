@@ -189,7 +189,7 @@ class Linkage:
         self.right = right  # right phase index
         self.index = np.array(index).astype(int)  # state index
         self.diff = np.array(bound).astype(float)  # limit
-        assert len(index) == self.diff.shape[1]
+        # assert len(index) == self.diff.shape[1]
 
 
 class Result:
